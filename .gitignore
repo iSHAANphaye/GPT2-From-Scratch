@@ -1,0 +1,23 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Model weights and large checkpoint files (>100MB)
+*.pth
+*.pt
+*.bin
+*.ckpt.data*
+!3. LLM Architecture/training_metrics.pth
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Environments
+venv/
+.venv/
+env/
+
+# OS files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPT-2 From Scratch - Interactive Studio</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo-area">
+                    <div class="logo-icon">⚡</div>
+                    <div>
+                        <h1>GPT-2 Studio</h1>
+                        <p class="subtitle">Built From Scratch &bull; Interactive Multi-Model Interface</p>
+                    </div>
+                </div>
+                <div class="status-badge" id="device-status">
+                    <span class="status-dot"></span>
+                    <span id="device-text">Connecting...</span>
+                </div>
+            </div>
+            
+            <!-- Navigation Tabs -->
+            <nav class="nav-tabs">
+                <button class="tab-btn active" data-tab="instruct">
+                    <span class="tab-icon">🤖</span> AI Assistant <span class="badge">SFT 355M</span>
+                </button>
+                <button class="tab-btn" data-tab="classify">
+                    <span class="tab-icon">🛡️</span> Spam Detector <span class="badge">Classifier 124M</span>
+                </button>
+                <button class="tab-btn" data-tab="generate">
+                    <span class="tab-icon">✍️</span> Creative Generator <span class="badge">Base 124M</span>
+                </button>
+            </nav>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- TAB 1: Instruction Fine-Tuned Model -->
+            <section class="tab-pane active" id="pane-instruct">
+                <div class="panel-header">
+                    <h2>Instruction-Following Assistant</h2>
+                    <p>Fine-tuned on the Alpaca dataset to execute requests, answer questions, rewrite text, and correct grammar.</p>
+                </div>
+
+                <!-- Quick Presets -->
+                <div class="preset-section">
+                    <span class="preset-label">Try an example:</span>
+                    <div class="preset-chips">
+                        <button class="chip" onclick="setInstruct('Rewrite the sentence using a simile.', 'The car is very fast.')">⚡ Simile</button>
+                        <button class="chip" onclick="setInstruct('Edit the following sentence for grammar.', 'He go to the park every day.')">✏️ Grammar</button>
+                        <button class="chip" onclick="setInstruct('Convert this sentence to passive voice.', 'The chef cooked a delicious meal.')">🔄 Passive Voice</button>
+                        <button class="chip" onclick="setInstruct('What is the melting point of iron?', '')">🔬 Q&A</button>
+                        <button class="chip" onclick="setInstruct('Convert 45 kilometers to meters.', '')">📏 Math</button>
+                        <button class="chip" onclick="setInstruct('Suggest a more formal synonym for \'happy\'.', '')">📖 Synonym</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="instruct-input">Instruction <span class="required">*</span></label>
+                    <textarea id="instruct-input" rows="3" placeholder="e.g. Rewrite the following sentence using a simile..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="instruct-context">Input / Context <span class="optional">(Optional)</span></label>
+                    <input type="text" id="instruct-context" placeholder="e.g. The car is very fast.">
+                </div>
+
+                <div class="controls-row">
+                    <div class="control-item">
+                        <label for="instruct-tokens">Max Tokens: <span id="val-instruct-tokens">120</span></label>
+                        <input type="range" id="instruct-tokens" min="20" max="250" value="120">
+                    </div>
+                    <button class="btn btn-primary" id="btn-instruct" onclick="runInstruction()">
+                        <span>Send Request</span>
+                    </button>
+                </div>
+
+                <!-- Response Box -->
+                <div class="output-card" id="card-instruct" style="display: none;">
+                    <div class="output-header">
+                        <span>Assistant Response</span>
+                        <div class="output-actions">
+                            <span class="metric-pill" id="instruct-metrics"></span>
+                            <button class="btn-icon" onclick="copyOutput('instruct-response')">📋 Copy</button>
+                        </div>
+                    </div>
+                    <div class="output-body">
+                        <div class="response-text" id="instruct-response"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: Classification Fine-Tuned Model -->
+            <section class="tab-pane" id="pane-classify">
+                <div class="panel-header">
+                    <h2>SMS Spam / Ham Classifier</h2>
+                    <p>Fine-tuned on the SMS Spam Collection dataset to categorize messages with high accuracy.</p>
+                </div>
+
+                <div class="preset-section">
+                    <span class="preset-label">Test with sample SMS:</span>
+                    <div class="preset-chips">
+                        <button class="chip chip-ham" onclick="setClassify('Hey, are we still having dinner at 7pm tonight?')">🟢 Normal Message</button>
+                        <button class="chip chip-ham" onclick="setClassify('Can you please email me the project slides from today?')">🟢 Work Request</button>
+                        <button class="chip chip-spam" onclick="setClassify('WINNER!! You have been selected for a $1,000 cash prize! Call 08712402050 now to claim!')">🔴 Lottery Scam</button>
+                        <button class="chip chip-spam" onclick="setClassify('URGENT! Your mobile account will be suspended. Text YES to 88088 to verify your details.')">🔴 Urgent Spam</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="classify-input">Message Content <span class="required">*</span></label>
+                    <textarea id="classify-input" rows="4" placeholder="Type or paste any SMS message to analyze..."></textarea>
+                </div>
+
+                <div class="controls-row justify-end">
+                    <button class="btn btn-primary" id="btn-classify" onclick="runClassification()">
+                        <span>Classify Message</span>
+                    </button>
+                </div>
+
+                <!-- Verdict Box -->
+                <div class="output-card" id="card-classify" style="display: none;">
+                    <div class="output-header">
+                        <span>Classification Result</span>
+                        <span class="metric-pill" id="classify-metrics"></span>
+                    </div>
+                    <div class="verdict-container">
+                        <div class="verdict-badge" id="verdict-badge">
+                            <span class="verdict-icon" id="verdict-icon"></span>
+                            <span class="verdict-title" id="verdict-title"></span>
+                        </div>
+                        <div class="confidence-bar-wrapper">
+                            <div class="confidence-label">
+                                <span>Model Confidence:</span>
+                                <strong id="confidence-value">0%</strong>
+                            </div>
+                            <div class="confidence-track">
+                                <div class="confidence-fill" id="confidence-fill"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: Base Generative Model -->
+            <section class="tab-pane" id="pane-generate">
+                <div class="panel-header">
+                    <h2>Creative Text Generator</h2>
+                    <p>Autoregressive next-token prediction with customizable temperature and top-k sampling.</p>
+                </div>
+
+                <div class="preset-section">
+                    <span class="preset-label">Prompt suggestions:</span>
+                    <div class="preset-chips">
+                        <button class="chip" onclick="setPrompt('Every effort moves you')">🌟 Effort</button>
+                        <button class="chip" onclick="setPrompt('In a distant galaxy, human travelers discovered')">🚀 Sci-Fi</button>
+                        <button class="chip" onclick="setPrompt('The ancient philosopher looked at the stars and said')">📜 Philosophy</button>
+                        <button class="chip" onclick="setPrompt('Artificial intelligence will transform the world by')">🤖 Future AI</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="generate-prompt">Prompt <span class="required">*</span></label>
+                    <textarea id="generate-prompt" rows="4" placeholder="Enter starting words or a story prompt..."></textarea>
+                </div>
+
+                <div class="sliders-grid">
+                    <div class="control-item">
+                        <label for="gen-tokens">Max Tokens: <strong id="val-gen-tokens">50</strong></label>
+                        <input type="range" id="gen-tokens" min="10" max="200" value="50">
+                    </div>
+                    <div class="control-item">
+                        <label for="gen-temp">Temperature: <strong id="val-gen-temp">0.7</strong> <span class="hint">(Creativity)</span></label>
+                        <input type="range" id="gen-temp" min="0.0" max="1.5" step="0.05" value="0.7">
+                    </div>
+                    <div class="control-item">
+                        <label for="gen-topk">Top-K: <strong id="val-gen-topk">50</strong> <span class="hint">(Vocabulary pool)</span></label>
+                        <input type="range" id="gen-topk" min="1" max="100" value="50">
+                    </div>
+                </div>
+
+                <div class="controls-row justify-end">
+                    <button class="btn btn-primary" id="btn-generate" onclick="runGeneration()">
+                        <span>Generate Text</span>
+                    </button>
+                </div>
+
+                <div class="output-card" id="card-generate" style="display: none;">
+                    <div class="output-header">
+                        <span>Generated Completion</span>
+                        <div class="output-actions">
+                            <span class="metric-pill" id="gen-metrics"></span>
+                            <button class="btn-icon" onclick="copyOutput('generate-output')">📋 Copy</button>
+                        </div>
+                    </div>
+                    <div class="output-body">
+                        <div class="response-text" id="generate-output"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>GPT-2 From Scratch Implementation &bull; Built with PyTorch &bull; Zero external API dependencies</p>
+        </footer>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
